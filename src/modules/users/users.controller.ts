@@ -10,6 +10,7 @@ import {
   Res,
   Next,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import express from 'express';
@@ -23,8 +24,10 @@ import { DeleteUserCommand } from './commands/impl/delete-user.command';
 import Helper, { QueryParams } from '../../utils/helper';
 import { ExecuteResponse, Paginate } from '../../utils/custom.interface';
 import { Users } from '../../../generated/prisma/client';
+import { AuthGuard } from '../../auth/auth.guard';
 
 @Controller('/api/users')
+@UseGuards(AuthGuard)
 export class UsersController {
   constructor(
     private readonly commandBus: CommandBus,
