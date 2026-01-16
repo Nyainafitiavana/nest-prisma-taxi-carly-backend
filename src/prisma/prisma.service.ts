@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '../../generated/prisma/client';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
-import { environment } from '../../environment';
+import 'dotenv/config';
 
 @Injectable()
 export class PrismaService extends PrismaClient {
   constructor() {
     const adapter = new PrismaMariaDb({
-      host: environment.DB_HOST,
-      port: environment.DB_PORT,
-      user: environment.DB_USER,
-      password: environment.DB_PASSWORD,
-      database: environment.DB_NAME,
+      host: process.env.DB_HOST,
+      port: Number(process.env.DB_PORT) || 3306,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
       connectionLimit: 10, // optional, default is 10
     });
     super({ adapter });

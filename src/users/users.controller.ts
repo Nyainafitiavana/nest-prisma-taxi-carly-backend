@@ -21,7 +21,6 @@ import { Users } from '../../generated/prisma/client';
 import { AuthGuard } from '../auth/auth.guard';
 
 @Controller('/api/users')
-@UseGuards(AuthGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
