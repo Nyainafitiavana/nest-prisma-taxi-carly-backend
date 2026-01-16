@@ -1,8 +1,29 @@
-class Helper {
-  public calculateOffset = (limit: number, page: number): number => {
-    return limit * (page - 1);
-  };
+import express from 'express';
 
+export type QueryParams = {
+  limit: number | null;
+  page: number | null;
+  value: string | null;
+};
+
+class Helper {
+  calculateOffset(limit: number, page?: number): number {
+    if (!page || page <= 1) {
+      return 0;
+    }
+    return (page - 1) * limit;
+  }
+
+  buildQueryParams(req: express.Request): QueryParams {
+    const limit: number | null = req.query.limit
+      ? Number(req.query.limit)
+      : null;
+    const page: number | null = req.query.page ? Number(req.query.page) : null;
+    const value: string = req.query.value ? (req.query.value as string) : '';
+
+    return { limit: limit, page: page, value: value };
+  }
+  /*
   public getDateNowString = (): string => {
     const date: Date = new Date();
     const year: string = date.toLocaleString('default', { year: 'numeric' });
@@ -73,6 +94,6 @@ class Helper {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(price);
-  };
+  };*/
 }
 export default Helper;
