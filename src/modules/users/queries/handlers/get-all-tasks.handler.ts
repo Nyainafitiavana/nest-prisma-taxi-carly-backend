@@ -1,7 +1,7 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { PrismaService } from '../../../../prisma/prisma.service';
 import { Paginate } from '../../../../utils/custom.interface';
-import { Prisma, Users } from '../../../../../generated/prisma/client';
+import { Prisma, users } from '../../../../../generated/prisma/client';
 import Helper from '../../../../utils/helper';
 import { GetAllUsersQuery } from '../impl/get-all-users.query';
 
@@ -12,10 +12,10 @@ export class GetAllUsersHandler implements IQueryHandler<GetAllUsersQuery> {
     private readonly helper: Helper,
   ) {}
 
-  async execute(params: GetAllUsersQuery): Promise<Paginate<Users[]>> {
+  async execute(params: GetAllUsersQuery): Promise<Paginate<users[]>> {
     const { limit, page, value } = params;
 
-    const query: Prisma.UsersFindManyArgs = {
+    const query: Prisma.usersFindManyArgs = {
       select: {
         id: true,
         nom: true,

@@ -2,7 +2,7 @@ import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { CreateUserCommand } from '../impl/create-user.command';
 import { PrismaService } from '../../../../prisma/prisma.service';
 import { UserCreatedEvent } from '../../events/impl/user-created.event';
-import { Users } from '../../../../../generated/prisma/client';
+import { users } from '../../../../../generated/prisma/client';
 import { ExecuteResponse } from '../../../../utils/custom.interface';
 import { MESSAGE } from '../../../../utils/constant';
 import { HttpStatus } from '@nestjs/common';
@@ -16,7 +16,7 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
 
   async execute(command: CreateUserCommand): Promise<ExecuteResponse> {
     const { createUserDto } = command;
-    const user: Users = await this.prisma.users.create({
+    const user: users = await this.prisma.users.create({
       data: {
         ...createUserDto,
         password: 'default password',

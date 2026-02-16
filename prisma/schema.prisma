@@ -7,270 +7,6 @@ datasource db {
   provider = "mysql"
 }
 
-model AnonymousUserSessions {
-  id                Int      @id @default(autoincrement())
-  sessionId         String   @unique(map: "IDX_ca0476a142ad4b8858e1b1133c") @db.VarChar(255)
-  ipAddress         String?  @db.VarChar(255)
-  userAgent         String?  @db.VarChar(255)
-  deviceType        String?  @db.VarChar(255)
-  lastActiveAt      DateTime @db.DateTime(0)
-  isCurrentlyActive Int      @default(1) @db.TinyInt
-  createdAt         DateTime @db.DateTime(0)
-  latitude          String?  @db.VarChar(255)
-  longitude         String?  @db.VarChar(255)
-}
-
-model Chauffeurs {
-  id           Int            @id @default(autoincrement())
-  note         Int            @default(0)
-  numPermis    String         @db.VarChar(255)
-  vehiculeId   Int
-  userId       Int            @unique(map: "REL_8827e665f55368801919a69946")
-  permis       String?        @db.VarChar(255)
-  inCourse     Int?           @db.TinyInt
-  facebookId   String?        @db.VarChar(255)
-  Vehicules    Vehicules      @relation(fields: [vehiculeId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_1a5761f09fe06f91512d97b5be3")
-  Users        Users          @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_8827e665f55368801919a699463")
-  Courses      Courses[]
-  Propositions Propositions[]
-
-  @@index([vehiculeId], map: "FK_1a5761f09fe06f91512d97b5be3")
-}
-
-model Clients {
-  id      Int       @id @default(autoincrement())
-  userId  Int?      @unique(map: "REL_fe6f86b19ca91c2943a67a3db2")
-  Users   Users?    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_fe6f86b19ca91c2943a67a3db2d")
-  Trajets Trajets[]
-}
-
-model Conversations {
-  id            Int      @id @default(autoincrement())
-  createdAt     DateTime @default(now()) @db.DateTime(6)
-  updatedAt     DateTime @default(now()) @db.DateTime(6)
-  request_id    String?  @db.VarChar(255)
-  state         String   @db.VarChar(255)
-  departure     String?  @db.VarChar(255)
-  departureTime String?  @db.VarChar(255)
-  timestamp     BigInt
-  arrival       String?  @db.VarChar(255)
-  price         Int?
-  driverId      String   @db.VarChar(255)
-}
-
-model Courses {
-  id                    Int                         @id @default(autoincrement())
-  createdAt             DateTime                    @default(now()) @db.DateTime(6)
-  updatedAt             DateTime                    @default(now()) @db.DateTime(6)
-  etat                  Courses_etat
-  modePayement          Courses_modePayement
-  depLongChauff         Decimal                     @db.Decimal(10, 0)
-  depLatChauff          Decimal                     @db.Decimal(10, 0)
-  finishedByClient      Int                         @default(0) @db.TinyInt
-  finishedByDriver      Int                         @default(0) @db.TinyInt
-  finishedAt            DateTime?                   @db.DateTime(0)
-  TrajetId              Int?
-  ChauffeurId           Int?
-  isDelete              Int                         @default(0) @db.TinyInt
-  isDriverCloseToClient Int                         @default(0) @db.TinyInt
-  qrCodeScannerStatus   Courses_qrCodeScannerStatus @default(NOT_INIT)
-  isPaid                Int                         @default(0) @db.TinyInt
-  Chauffeurs            Chauffeurs?                 @relation(fields: [ChauffeurId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_119bd3a11ee4be14b1e5345d2f8")
-  Trajets               Trajets?                    @relation(fields: [TrajetId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_d61d551a21e3258dcffce5efc9e")
-  Payments              Payments?
-
-  @@index([ChauffeurId], map: "FK_119bd3a11ee4be14b1e5345d2f8")
-  @@index([TrajetId], map: "FK_d61d551a21e3258dcffce5efc9e")
-}
-
-model FbMessage {
-  id              Int      @id @default(autoincrement())
-  createdAt       DateTime @default(now()) @db.DateTime(6)
-  updatedAt       DateTime @default(now()) @db.DateTime(6)
-  senderId        String   @db.VarChar(255)
-  lastMessage     String   @db.VarChar(255)
-  lastMessageDate DateTime @default(now()) @db.Timestamp(6)
-}
-
-model Parametre {
-  id                                  Int      @id @default(autoincrement())
-  createdAt                           DateTime @default(now()) @db.DateTime(6)
-  updatedAt                           DateTime @default(now()) @db.DateTime(6)
-  rayonDecouvertureTrajet             Int      @default(5)
-  trajetExpirationTime                Int      @default(30)
-  TrajetExpirationTimeWithProposition Int      @default(120)
-  finishedCourseAutoTime              Int      @default(5)
-  finishedCourseReminder              Int      @default(120)
-  updateProfileClientTime             Int      @default(1440)
-  updateProfileDriverTime             Int      @default(2880)
-  allowUserToCreateTrajetDate         DateTime @default(dbgenerated("'2025-10-01'")) @db.Date
-}
-
-model Payments {
-  id                Int      @id @default(autoincrement())
-  createdAt         DateTime @default(now()) @db.DateTime(6)
-  updatedAt         DateTime @default(now()) @db.DateTime(6)
-  provider          String   @db.VarChar(255)
-  transactionId     String   @db.VarChar(255)
-  transactionStatus String   @db.VarChar(255)
-  amount            Int
-  courseId          Int?     @unique(map: "REL_7b423371808e91621e2aa77438")
-  Courses           Courses? @relation(fields: [courseId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_7b423371808e91621e2aa77438b")
-}
-
-model Propositions {
-  id              Int         @id @default(autoincrement())
-  createdAt       DateTime    @default(now()) @db.DateTime(6)
-  updatedAt       DateTime    @default(now()) @db.DateTime(6)
-  prix            Decimal     @db.Decimal(10, 0)
-  precisionDepart String?     @db.VarChar(255)
-  precisionArrive String?     @db.VarChar(255)
-  isValidated     Int         @default(0) @db.TinyInt
-  latDriver       Decimal     @db.Decimal(10, 4)
-  lngDriver       Decimal     @db.Decimal(10, 4)
-  isCanceled      Int         @default(0) @db.TinyInt
-  trajetId        Int?
-  chauffeurId     Int?
-  Trajets         Trajets?    @relation(fields: [trajetId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_103cc6947d338c2835a0e380968")
-  Chauffeurs      Chauffeurs? @relation(fields: [chauffeurId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_3a5fc9a316c16fc920900677b77")
-
-  @@index([trajetId], map: "FK_103cc6947d338c2835a0e380968")
-  @@index([chauffeurId], map: "FK_3a5fc9a316c16fc920900677b77")
-}
-
-model RequestStats {
-  id          Int                     @id @default(autoincrement())
-  createdAt   DateTime                @default(now()) @db.DateTime(6)
-  updatedAt   DateTime                @default(now()) @db.DateTime(6)
-  requestId   String                  @db.VarChar(255)
-  driverId    String                  @db.VarChar(255)
-  available   RequestStats_available?
-  minPrice    Int?
-  maxPrice    Int?
-  respondedAt DateTime                @default(now()) @db.Timestamp(6)
-}
-
-model SequelizeMeta {
-  name String @id @unique(map: "name") @db.VarChar(255)
-}
-
-model SignUpClicks {
-  id         Int      @id @default(autoincrement())
-  createdAt  DateTime @default(now()) @db.DateTime(6)
-  updatedAt  DateTime @default(now()) @db.DateTime(6)
-  sessionId  String?  @db.VarChar(255)
-  ipAddress  String?  @db.VarChar(255)
-  deviceType String?  @db.VarChar(50)
-  userAgent  String?  @db.VarChar(255)
-
-  @@index([sessionId], map: "IDX_517c0c5083fab78d65fb82a447")
-  @@index([createdAt], map: "IDX_SignUpClicks_createdAt")
-  @@index([deviceType], map: "IDX_add75d8c941b817b222e15b75a")
-}
-
-model Trajets {
-  id                                   Int            @id @default(autoincrement())
-  createdAt                            DateTime       @default(now()) @db.DateTime(6)
-  updatedAt                            DateTime       @default(now()) @db.DateTime(6)
-  etat                                 Trajets_etat   @default(EN_COURS)
-  latDep                               Decimal        @db.Decimal(10, 4)
-  longDep                              Decimal        @db.Decimal(10, 4)
-  latArr                               Decimal        @db.Decimal(10, 4)
-  longArr                              Decimal        @db.Decimal(10, 4)
-  precisionDepart                      String?        @db.VarChar(255)
-  precisionArrive                      String?        @db.VarChar(255)
-  ClientId                             Int
-  VilleDepartId                        Int?
-  VilleArriveId                        Int?
-  heureDepart                          DateTime?      @db.DateTime(0)
-  heureArrive                          DateTime?      @db.DateTime(0)
-  autoCancel                           Int?           @db.TinyInt
-  Courses                              Courses[]
-  Propositions                         Propositions[]
-  Villes_Trajets_VilleArriveIdToVilles Villes?        @relation("Trajets_VilleArriveIdToVilles", fields: [VilleArriveId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_0ad95b13c1c97e85fcc64487c35")
-  Villes_Trajets_VilleDepartIdToVilles Villes?        @relation("Trajets_VilleDepartIdToVilles", fields: [VilleDepartId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_78b3d13872163dfa1af1d6a23de")
-  Clients                              Clients        @relation(fields: [ClientId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_849418e69a3b701f9fbe627a16b")
-  feed_back                            feed_back[]
-  position                             position[]
-
-  @@index([VilleArriveId], map: "FK_0ad95b13c1c97e85fcc64487c35")
-  @@index([VilleDepartId], map: "FK_78b3d13872163dfa1af1d6a23de")
-  @@index([ClientId], map: "FK_849418e69a3b701f9fbe627a16b")
-}
-
-model UserActivityHistory {
-  id                 Int                              @id @default(autoincrement())
-  userId             Int?
-  anonymousSessionId String?                          @db.VarChar(255)
-  activityType       UserActivityHistory_activityType
-  isActiveSnapshot   Int                              @default(1) @db.TinyInt
-  deviceType         String?                          @db.VarChar(255)
-  ipAddress          String?                          @db.VarChar(255)
-  latitude           String?                          @db.VarChar(255)
-  longitude          String?                          @db.VarChar(255)
-  occurredAt         DateTime                         @db.DateTime(0)
-
-  @@index([occurredAt], map: "IDX_95b455d81d8816e949204369e1")
-  @@index([userId], map: "IDX_aa70957efd8d4aef182e067b19")
-  @@index([anonymousSessionId], map: "IDX_b0fce3063c49ba788bb89dacce")
-}
-
-model Users {
-  id                      Int                   @id @unique(map: "IDX_16d4f7d636df336db11d87413e") @default(autoincrement())
-  createdAt               DateTime              @default(now()) @db.DateTime(6)
-  updatedAt               DateTime              @default(now()) @db.DateTime(6)
-  username                String                @unique(map: "IDX_ffc81a3b97dcbf8e320d5106c0") @db.VarChar(255)
-  password                String                @db.VarChar(255)
-  roles                   Users_roles
-  email                   String                @unique(map: "IDX_3c3ab3f49a87e6ddb607f3c494") @db.VarChar(255)
-  nom                     String                @db.VarChar(255)
-  prenom                  String                @db.VarChar(255)
-  telephone               String                @unique(map: "IDX_7bf57c28a8238d97fd51943544") @db.VarChar(255)
-  numero_paiment          String?               @db.VarChar(255)
-  cin                     String?               @db.VarChar(255)
-  photo                   String?               @db.VarChar(255)
-  tpe                     String?               @db.VarChar(255)
-  placeName               String?               @db.VarChar(255)
-  addressePersonnelle     String?               @db.VarChar(255)
-  addresseProfessionnelle String?               @db.VarChar(255)
-  commentaire             String?               @db.VarChar(255)
-  latitude                String?               @db.VarChar(255)
-  longitude               String?               @db.VarChar(255)
-  isDelete                Int                   @default(0) @db.TinyInt
-  firstConnection         Int                   @default(0) @db.TinyInt
-  active                  Int?                  @db.TinyInt
-  ip_address              String?               @db.VarChar(255)
-  created_on              Int?
-  isRestricted            Int?                  @db.TinyInt
-  restrictDate            DateTime?             @db.DateTime(0)
-  cin_verso               String?               @db.VarChar(255)
-  lastActiveAt            DateTime?             @db.DateTime(0)
-  isCurrentlyActive       Int                   @default(0) @db.TinyInt
-  Chauffeurs              Chauffeurs?
-  Clients                 Clients?
-  feed_back               feed_back[]
-  notification_tokens     notification_tokens[]
-  position                position[]
-}
-
-model Vehicules {
-  id              Int            @id @default(autoincrement())
-  immatriculation String         @db.VarChar(255)
-  type            Vehicules_type @default(PARTICULIER)
-  licence         String?        @db.VarChar(255)
-  marque          String         @db.VarChar(255)
-  photo           String?        @db.VarChar(255)
-  annee           String         @db.VarChar(255)
-  Chauffeurs      Chauffeurs[]
-}
-
-model Villes {
-  id                                    Int       @id @default(autoincrement())
-  nom                                   String    @db.VarChar(255)
-  Trajets_Trajets_VilleArriveIdToVilles Trajets[] @relation("Trajets_VilleArriveIdToVilles")
-  Trajets_Trajets_VilleDepartIdToVilles Trajets[] @relation("Trajets_VilleDepartIdToVilles")
-}
-
 model api_tokens {
   id         Int       @id @default(autoincrement())
   user_id    Int
@@ -298,8 +34,8 @@ model feed_back {
   rating       Int
   userId       Int?
   trajetId     Int?
-  Trajets      Trajets? @relation(fields: [trajetId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_1fae34859254ccb1e901d78c5d7")
-  Users        Users?   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_2573929a556334405fbbcbc4676")
+  Trajets      trajets? @relation(fields: [trajetId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_1fae34859254ccb1e901d78c5d7")
+  Users        users?   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_2573929a556334405fbbcbc4676")
 
   @@index([trajetId], map: "FK_1fae34859254ccb1e901d78c5d7")
   @@index([userId], map: "FK_2573929a556334405fbbcbc4676")
@@ -341,7 +77,7 @@ model notification_tokens {
   status             String          @default("ACTIVE") @db.VarChar(255)
   user_id            Int?
   typeUser           String          @db.VarChar(255)
-  Users              Users?          @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_046760648e82c2ae7c5253d1a14")
+  Users              users?          @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_046760648e82c2ae7c5253d1a14")
   notifications      notifications[]
 
   @@index([user_id], map: "FK_046760648e82c2ae7c5253d1a14")
@@ -376,8 +112,8 @@ model position {
   trajetId  Int?
   lat       Decimal  @db.Decimal(10, 4)
   long      Decimal  @db.Decimal(10, 4)
-  Users     Users?   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_039f90c019013ef5d8d032f32f1")
-  Trajets   Trajets? @relation(fields: [trajetId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_53ff6135bfb022d24742f991716")
+  Users     users?   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_039f90c019013ef5d8d032f32f1")
+  Trajets   trajets? @relation(fields: [trajetId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_53ff6135bfb022d24742f991716")
 
   @@index([userId], map: "FK_039f90c019013ef5d8d032f32f1")
   @@index([trajetId], map: "FK_53ff6135bfb022d24742f991716")
@@ -422,13 +158,277 @@ model usersappli {
   users_groups            users_groups[]
 }
 
-enum Vehicules_type {
+model anonymoususersessions {
+  id                Int      @id @default(autoincrement())
+  sessionId         String   @unique(map: "IDX_ca0476a142ad4b8858e1b1133c") @db.VarChar(255)
+  ipAddress         String?  @db.VarChar(255)
+  userAgent         String?  @db.VarChar(255)
+  deviceType        String?  @db.VarChar(255)
+  lastActiveAt      DateTime @db.DateTime(0)
+  isCurrentlyActive Int      @default(1) @db.TinyInt
+  createdAt         DateTime @db.DateTime(0)
+  latitude          String?  @db.VarChar(255)
+  longitude         String?  @db.VarChar(255)
+}
+
+model chauffeurs {
+  id           Int            @id @default(autoincrement())
+  note         Int            @default(0)
+  numPermis    String         @db.VarChar(255)
+  vehiculeId   Int
+  userId       Int            @unique(map: "REL_8827e665f55368801919a69946")
+  permis       String?        @db.VarChar(255)
+  inCourse     Int?           @db.TinyInt
+  facebookId   String?        @db.VarChar(255)
+  vehicules    vehicules      @relation(fields: [vehiculeId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_1a5761f09fe06f91512d97b5be3")
+  users        users          @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_8827e665f55368801919a699463")
+  courses      courses[]
+  propositions propositions[]
+
+  @@index([vehiculeId], map: "FK_1a5761f09fe06f91512d97b5be3")
+}
+
+model clients {
+  id      Int       @id @default(autoincrement())
+  userId  Int?      @unique(map: "REL_fe6f86b19ca91c2943a67a3db2")
+  users   users?    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_fe6f86b19ca91c2943a67a3db2d")
+  trajets trajets[]
+}
+
+model conversations {
+  id            Int      @id @default(autoincrement())
+  createdAt     DateTime @default(now()) @db.DateTime(6)
+  updatedAt     DateTime @default(now()) @db.DateTime(6)
+  request_id    String?  @db.VarChar(255)
+  state         String   @db.VarChar(255)
+  departure     String?  @db.VarChar(255)
+  departureTime String?  @db.VarChar(255)
+  timestamp     BigInt
+  arrival       String?  @db.VarChar(255)
+  price         Int?
+  driverId      String   @db.VarChar(255)
+}
+
+model courses {
+  id                    Int                         @id @default(autoincrement())
+  createdAt             DateTime                    @default(now()) @db.DateTime(6)
+  updatedAt             DateTime                    @default(now()) @db.DateTime(6)
+  etat                  courses_etat
+  modePayement          courses_modePayement
+  depLongChauff         Decimal                     @db.Decimal(10, 0)
+  depLatChauff          Decimal                     @db.Decimal(10, 0)
+  finishedByClient      Int                         @default(0) @db.TinyInt
+  finishedByDriver      Int                         @default(0) @db.TinyInt
+  finishedAt            DateTime?                   @db.DateTime(0)
+  TrajetId              Int?
+  ChauffeurId           Int?
+  isDelete              Int                         @default(0) @db.TinyInt
+  isDriverCloseToClient Int                         @default(0) @db.TinyInt
+  qrCodeScannerStatus   courses_qrCodeScannerStatus @default(NOT_INIT)
+  isPaid                Int                         @default(0) @db.TinyInt
+  chauffeurs            chauffeurs?                 @relation(fields: [ChauffeurId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_119bd3a11ee4be14b1e5345d2f8")
+  trajets               trajets?                    @relation(fields: [TrajetId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_d61d551a21e3258dcffce5efc9e")
+  payments              payments?
+
+  @@index([ChauffeurId], map: "FK_119bd3a11ee4be14b1e5345d2f8")
+  @@index([TrajetId], map: "FK_d61d551a21e3258dcffce5efc9e")
+}
+
+model fbmessage {
+  id              Int      @id @default(autoincrement())
+  createdAt       DateTime @default(now()) @db.DateTime(6)
+  updatedAt       DateTime @default(now()) @db.DateTime(6)
+  senderId        String   @db.VarChar(255)
+  lastMessage     String   @db.VarChar(255)
+  lastMessageDate DateTime @default(now()) @db.Timestamp(6)
+}
+
+model parametre {
+  id                                  Int      @id @default(autoincrement())
+  createdAt                           DateTime @default(now()) @db.DateTime(6)
+  updatedAt                           DateTime @default(now()) @db.DateTime(6)
+  rayonDecouvertureTrajet             Int      @default(5)
+  trajetExpirationTime                Int      @default(30)
+  TrajetExpirationTimeWithProposition Int      @default(120)
+  finishedCourseAutoTime              Int      @default(5)
+  finishedCourseReminder              Int      @default(120)
+  updateProfileClientTime             Int      @default(1440)
+  updateProfileDriverTime             Int      @default(2880)
+  allowUserToCreateTrajetDate         DateTime @default(dbgenerated("('2025-10-01')")) @db.Date
+}
+
+model payments {
+  id                Int      @id @default(autoincrement())
+  createdAt         DateTime @default(now()) @db.DateTime(6)
+  updatedAt         DateTime @default(now()) @db.DateTime(6)
+  provider          String   @db.VarChar(255)
+  transactionId     String   @db.VarChar(255)
+  transactionStatus String   @db.VarChar(255)
+  amount            Int
+  courseId          Int?     @unique(map: "REL_7b423371808e91621e2aa77438")
+  courses           courses? @relation(fields: [courseId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_7b423371808e91621e2aa77438b")
+}
+
+model propositions {
+  id              Int         @id @default(autoincrement())
+  createdAt       DateTime    @default(now()) @db.DateTime(6)
+  updatedAt       DateTime    @default(now()) @db.DateTime(6)
+  prix            Decimal     @db.Decimal(10, 0)
+  precisionDepart String?     @db.VarChar(255)
+  precisionArrive String?     @db.VarChar(255)
+  isValidated     Int         @default(0) @db.TinyInt
+  latDriver       Decimal     @db.Decimal(10, 4)
+  lngDriver       Decimal     @db.Decimal(10, 4)
+  isCanceled      Int         @default(0) @db.TinyInt
+  trajetId        Int?
+  chauffeurId     Int?
+  trajets         trajets?    @relation(fields: [trajetId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_103cc6947d338c2835a0e380968")
+  chauffeurs      chauffeurs? @relation(fields: [chauffeurId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_3a5fc9a316c16fc920900677b77")
+
+  @@index([trajetId], map: "FK_103cc6947d338c2835a0e380968")
+  @@index([chauffeurId], map: "FK_3a5fc9a316c16fc920900677b77")
+}
+
+model requeststats {
+  id          Int                     @id @default(autoincrement())
+  createdAt   DateTime                @default(now()) @db.DateTime(6)
+  updatedAt   DateTime                @default(now()) @db.DateTime(6)
+  requestId   String                  @db.VarChar(255)
+  driverId    String                  @db.VarChar(255)
+  available   requeststats_available?
+  minPrice    Int?
+  maxPrice    Int?
+  respondedAt DateTime                @default(now()) @db.Timestamp(6)
+}
+
+model sequelizemeta {
+  name String @id @unique(map: "name") @db.VarChar(255)
+}
+
+model signupclicks {
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now()) @db.DateTime(6)
+  updatedAt  DateTime @default(now()) @db.DateTime(6)
+  sessionId  String?  @db.VarChar(255)
+  ipAddress  String?  @db.VarChar(255)
+  deviceType String?  @db.VarChar(50)
+  userAgent  String?  @db.VarChar(255)
+
+  @@index([sessionId], map: "IDX_517c0c5083fab78d65fb82a447")
+  @@index([createdAt], map: "IDX_SignUpClicks_createdAt")
+  @@index([deviceType], map: "IDX_add75d8c941b817b222e15b75a")
+}
+
+model trajets {
+  id                                   Int            @id @default(autoincrement())
+  createdAt                            DateTime       @default(now()) @db.DateTime(6)
+  updatedAt                            DateTime       @default(now()) @db.DateTime(6)
+  etat                                 trajets_etat   @default(EN_COURS)
+  latDep                               Decimal        @db.Decimal(10, 4)
+  longDep                              Decimal        @db.Decimal(10, 4)
+  latArr                               Decimal        @db.Decimal(10, 4)
+  longArr                              Decimal        @db.Decimal(10, 4)
+  precisionDepart                      String?        @db.VarChar(255)
+  precisionArrive                      String?        @db.VarChar(255)
+  ClientId                             Int
+  VilleDepartId                        Int?
+  VilleArriveId                        Int?
+  heureDepart                          DateTime?      @db.DateTime(0)
+  heureArrive                          DateTime?      @db.DateTime(0)
+  autoCancel                           Int?           @db.TinyInt
+  courses                              courses[]
+  feed_back                            feed_back[]
+  position                             position[]
+  propositions                         propositions[]
+  villes_trajets_VilleArriveIdTovilles villes?        @relation("trajets_VilleArriveIdTovilles", fields: [VilleArriveId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_0ad95b13c1c97e85fcc64487c35")
+  villes_trajets_VilleDepartIdTovilles villes?        @relation("trajets_VilleDepartIdTovilles", fields: [VilleDepartId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_78b3d13872163dfa1af1d6a23de")
+  clients                              clients        @relation(fields: [ClientId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_849418e69a3b701f9fbe627a16b")
+
+  @@index([VilleArriveId], map: "FK_0ad95b13c1c97e85fcc64487c35")
+  @@index([VilleDepartId], map: "FK_78b3d13872163dfa1af1d6a23de")
+  @@index([ClientId], map: "FK_849418e69a3b701f9fbe627a16b")
+}
+
+model useractivityhistory {
+  id                 Int                              @id @default(autoincrement())
+  userId             Int?
+  anonymousSessionId String?                          @db.VarChar(255)
+  activityType       useractivityhistory_activityType
+  isActiveSnapshot   Int                              @default(1) @db.TinyInt
+  deviceType         String?                          @db.VarChar(255)
+  ipAddress          String?                          @db.VarChar(255)
+  latitude           String?                          @db.VarChar(255)
+  longitude          String?                          @db.VarChar(255)
+  occurredAt         DateTime                         @db.DateTime(0)
+
+  @@index([occurredAt], map: "IDX_95b455d81d8816e949204369e1")
+  @@index([userId], map: "IDX_aa70957efd8d4aef182e067b19")
+  @@index([anonymousSessionId], map: "IDX_b0fce3063c49ba788bb89dacce")
+}
+
+model users {
+  id                      Int                   @id @unique(map: "IDX_16d4f7d636df336db11d87413e") @default(autoincrement())
+  createdAt               DateTime              @default(now()) @db.DateTime(6)
+  updatedAt               DateTime              @default(now()) @db.DateTime(6)
+  username                String                @unique(map: "IDX_ffc81a3b97dcbf8e320d5106c0") @db.VarChar(255)
+  password                String                @db.VarChar(255)
+  roles                   users_roles
+  email                   String                @unique(map: "IDX_3c3ab3f49a87e6ddb607f3c494") @db.VarChar(255)
+  nom                     String                @db.VarChar(255)
+  prenom                  String                @db.VarChar(255)
+  telephone               String                @unique(map: "IDX_7bf57c28a8238d97fd51943544") @db.VarChar(255)
+  numero_paiment          String?               @db.VarChar(255)
+  cin                     String?               @db.VarChar(255)
+  photo                   String?               @db.VarChar(255)
+  tpe                     String?               @db.VarChar(255)
+  placeName               String?               @db.VarChar(255)
+  addressePersonnelle     String?               @db.VarChar(255)
+  addresseProfessionnelle String?               @db.VarChar(255)
+  commentaire             String?               @db.VarChar(255)
+  latitude                String?               @db.VarChar(255)
+  longitude               String?               @db.VarChar(255)
+  isDelete                Int                   @default(0) @db.TinyInt
+  firstConnection         Int                   @default(0) @db.TinyInt
+  active                  Int?                  @db.TinyInt
+  ip_address              String?               @db.VarChar(255)
+  created_on              Int?
+  isRestricted            Int?                  @db.TinyInt
+  restrictDate            DateTime?             @db.DateTime(0)
+  cin_verso               String?               @db.VarChar(255)
+  lastActiveAt            DateTime?             @db.DateTime(0)
+  isCurrentlyActive       Int                   @default(0) @db.TinyInt
+  chauffeurs              chauffeurs?
+  clients                 clients?
+  feed_back               feed_back[]
+  notification_tokens     notification_tokens[]
+  position                position[]
+}
+
+model vehicules {
+  id              Int            @id @default(autoincrement())
+  immatriculation String         @db.VarChar(255)
+  type            vehicules_type @default(PARTICULIER)
+  licence         String?        @db.VarChar(255)
+  marque          String         @db.VarChar(255)
+  photo           String?        @db.VarChar(255)
+  annee           String         @db.VarChar(255)
+  chauffeurs      chauffeurs[]
+}
+
+model villes {
+  id                                    Int       @id @default(autoincrement())
+  nom                                   String    @db.VarChar(255)
+  trajets_trajets_VilleArriveIdTovilles trajets[] @relation("trajets_VilleArriveIdTovilles")
+  trajets_trajets_VilleDepartIdTovilles trajets[] @relation("trajets_VilleDepartIdTovilles")
+}
+
+enum vehicules_type {
   TAXI
   MOTO
   PARTICULIER
 }
 
-enum Courses_etat {
+enum courses_etat {
   EN_COURS                 @map("EN COURS")
   EN_ATTENTE_DU_CHAUFFEUR  @map("EN ATTENTE DU CHAUFFEUR")
   ANNULER_PAR_LE_CHAUFFEUR @map("ANNULER PAR LE CHAUFFEUR")
@@ -436,37 +436,37 @@ enum Courses_etat {
   TERMINER
 }
 
-enum Trajets_etat {
+enum trajets_etat {
   EN_COURS @map("EN COURS")
   VALIDER
   ANNULER
 }
 
-enum UserActivityHistory_activityType {
+enum useractivityhistory_activityType {
   AUTH_HEARTBEAT
   ANON_HEARTBEAT
   MARK_INACTIVE
   STATUS_CHANGE
 }
 
-enum Courses_modePayement {
+enum courses_modePayement {
   TELMA
   ORANGE
   AIRTEL
   TPE
 }
 
-enum RequestStats_available {
+enum requeststats_available {
   yes
   no
 }
 
-enum Users_roles {
+enum users_roles {
   ROLE_CLIENT
   ROLE_CHAUFFEUR
 }
 
-enum Courses_qrCodeScannerStatus {
+enum courses_qrCodeScannerStatus {
   NOT_INIT
   INIT
   SUCCESS

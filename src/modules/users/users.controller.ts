@@ -23,8 +23,8 @@ import { GetUserQuery } from './queries/impl/get-user.queries';
 import { DeleteUserCommand } from './commands/impl/delete-user.command';
 import Helper, { QueryParams } from '../../utils/helper';
 import { ExecuteResponse, Paginate } from '../../utils/custom.interface';
-import { Users } from '../../../generated/prisma/client';
 import { AuthGuard } from '../../auth/auth.guard';
+import { users } from '../../../generated/prisma/client';
 
 @Controller('/api/users')
 @UseGuards(AuthGuard)
@@ -79,7 +79,7 @@ export class UsersController {
     try {
       const queryParams: QueryParams = this.helper.buildQueryParams(req);
 
-      const data: Paginate<Users[]> = await this.queryBus.execute(
+      const data: Paginate<users[]> = await this.queryBus.execute(
         new GetAllUsersQuery(
           queryParams.limit,
           queryParams.page,
@@ -100,7 +100,7 @@ export class UsersController {
     @Next() next: express.NextFunction,
   ): Promise<void> {
     try {
-      const task: Users = await this.queryBus.execute(new GetUserQuery(+id));
+      const task: users = await this.queryBus.execute(new GetUserQuery(+id));
 
       res.status(HttpStatus.OK).json(task);
     } catch (error) {
