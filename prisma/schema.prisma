@@ -34,11 +34,13 @@ model feed_back {
   rating       Int
   userId       Int?
   trajetId     Int?
+  partenaireId Int?
   Trajets      trajets? @relation(fields: [trajetId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_1fae34859254ccb1e901d78c5d7")
   Users        users?   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_2573929a556334405fbbcbc4676")
 
   @@index([trajetId], map: "FK_1fae34859254ccb1e901d78c5d7")
   @@index([userId], map: "FK_2573929a556334405fbbcbc4676")
+  @@index([partenaireId], map: "feed_back_partenaireId_fkey")
 }
 
 model groups {
@@ -77,10 +79,12 @@ model notification_tokens {
   status             String          @default("ACTIVE") @db.VarChar(255)
   user_id            Int?
   typeUser           String          @db.VarChar(255)
+  partenaireId       Int?
   Users              users?          @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_046760648e82c2ae7c5253d1a14")
   notifications      notifications[]
 
   @@index([user_id], map: "FK_046760648e82c2ae7c5253d1a14")
+  @@index([partenaireId], map: "notification_tokens_partenaireId_fkey")
 }
 
 model notifications {
@@ -106,17 +110,19 @@ model parametres {
 }
 
 model position {
-  id        Int      @id @default(autoincrement())
-  terminate Int      @default(0) @db.TinyInt
-  userId    Int?
-  trajetId  Int?
-  lat       Decimal  @db.Decimal(10, 4)
-  long      Decimal  @db.Decimal(10, 4)
-  Users     users?   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_039f90c019013ef5d8d032f32f1")
-  Trajets   trajets? @relation(fields: [trajetId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_53ff6135bfb022d24742f991716")
+  id           Int      @id @default(autoincrement())
+  terminate    Int      @default(0) @db.TinyInt
+  userId       Int?
+  trajetId     Int?
+  lat          Decimal  @db.Decimal(10, 4)
+  long         Decimal  @db.Decimal(10, 4)
+  partenaireId Int?
+  Users        users?   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_039f90c019013ef5d8d032f32f1")
+  Trajets      trajets? @relation(fields: [trajetId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_53ff6135bfb022d24742f991716")
 
   @@index([userId], map: "FK_039f90c019013ef5d8d032f32f1")
   @@index([trajetId], map: "FK_53ff6135bfb022d24742f991716")
+  @@index([partenaireId], map: "position_partenaireId_fkey")
 }
 
 model users_groups {
@@ -422,6 +428,17 @@ model villes {
   trajets_trajets_VilleDepartIdTovilles trajets[] @relation("trajets_VilleDepartIdTovilles")
 }
 
+model partenaires {
+  id        Int               @id @unique @default(autoincrement())
+  nom       String            @unique @db.VarChar(255)
+  email     String?           @unique @db.VarChar(255)
+  telephone String?           @unique @db.VarChar(255)
+  adresse   String?           @db.VarChar(255)
+  createdAt DateTime          @default(now()) @db.DateTime(6)
+  updatedAt DateTime          @default(now()) @db.DateTime(6)
+  status    partenaire_status @default(ACTIVE)
+}
+
 enum vehicules_type {
   TAXI
   MOTO
@@ -471,4 +488,9 @@ enum courses_qrCodeScannerStatus {
   INIT
   SUCCESS
   FAILED
+}
+
+enum partenaire_status {
+  ACTIVE
+  INACTIVE
 }

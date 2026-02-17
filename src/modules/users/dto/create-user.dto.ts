@@ -6,7 +6,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { Users_roles } from '../../../../generated/prisma/enums';
+import { users_roles } from '../../../../generated/prisma/enums';
 import { ValidationMessages } from '../../../common/validation/validation-messages';
 
 export class CreateUserDto {
@@ -42,5 +42,5 @@ export class CreateUserDto {
 
   @IsString({ message: ValidationMessages.type('Rôle', 'string') })
   @IsNotEmpty({ message: ValidationMessages.required('Rôle') })
-  public roles: Users_roles;
+  public roles: users_roles;
 }

@@ -4,6 +4,7 @@ export const MESSAGE = {
   EMAIL_NOT_FOUND: 'E-mail not found in database.',
   OK: 'The operation was successful.',
   KO: 'The operation was not successful.',
+  EXIST_VALUE: 'already exists.',
 };
 
 // export const STATUS = {
